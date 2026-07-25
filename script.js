@@ -254,8 +254,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
                     showNotification(
-                        "Не удалось отправить заявку. Попробуйте ещё раз."
-                    );
+    error.message || "Не удалось отправить заявку"
+);
 
 
                 } finally {
