@@ -3375,3 +3375,248 @@ img {
     transform: translateY(0);
 
 }
+
+/* =========================================================
+   EXTRA LIQUID GLASS — MORE TRANSPARENCY
+   ========================================================= */
+
+.glass-panel,
+.service-card,
+.review-card,
+.contact-card,
+.doctor-card,
+.about-text,
+.appointment-container,
+.contact-card,
+.results-placeholder {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.34),
+            rgba(255, 255, 255, 0.12)
+        );
+
+    backdrop-filter:
+        blur(45px)
+        saturate(170%);
+
+    -webkit-backdrop-filter:
+        blur(45px)
+        saturate(170%);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.65);
+
+    box-shadow:
+
+        0 25px 80px
+        rgba(60, 120, 145, 0.10),
+
+        inset 0 1px 0
+        rgba(255, 255, 255, 0.8),
+
+        inset 0 -1px 0
+        rgba(150, 210, 230, 0.12);
+
+}
+
+
+/* Движущиеся блики внутри стекла */
+
+.glass-panel::before,
+.service-card::before,
+.review-card::before,
+.contact-card::before,
+.doctor-card::before,
+.appointment-container::before {
+
+    content: "";
+
+    position: absolute;
+
+    width: 250px;
+
+    height: 250px;
+
+    top: -120px;
+
+    left: -100px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.55),
+            transparent 70%
+        );
+
+    filter: blur(20px);
+
+    pointer-events: none;
+
+    animation:
+        glassLightMove
+        9s
+        ease-in-out
+        infinite
+        alternate;
+
+}
+
+
+@keyframes glassLightMove {
+
+    from {
+
+        transform:
+            translate(0, 0)
+            scale(1);
+
+    }
+
+    to {
+
+        transform:
+            translate(300px, 180px)
+            scale(1.4);
+
+    }
+
+}
+
+
+/* Более прозрачный фон */
+
+body {
+
+    background:
+
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(180, 225, 240, 0.32),
+            transparent 35%
+        ),
+
+        radial-gradient(
+            circle at 90% 40%,
+            rgba(210, 220, 230, 0.35),
+            transparent 40%
+        ),
+
+        linear-gradient(
+            135deg,
+            #f8fcfd,
+            #eaf5f9
+        );
+
+}
+
+
+/* Стеклянные кнопки карт */
+
+.map-button {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 18px 22px;
+
+    border-radius: 22px;
+
+    color: var(--text);
+
+    background:
+
+        rgba(255,255,255,0.25);
+
+    border:
+
+        1px solid
+        rgba(255,255,255,0.65);
+
+    backdrop-filter:
+        blur(25px);
+
+    -webkit-backdrop-filter:
+        blur(25px);
+
+    box-shadow:
+
+        0 15px 35px
+        rgba(60,120,145,0.08);
+
+    transition:
+        0.5s
+        cubic-bezier(0.22, 1, 0.36, 1);
+
+}
+
+
+.map-button:hover {
+
+    transform:
+        translateY(-5px)
+        scale(1.02);
+
+    background:
+
+        rgba(255,255,255,0.45);
+
+}
+
+
+.map-logo {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,0.55);
+
+    font-size: 22px;
+
+}
+
+
+.map-button-text {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+}
+
+
+.map-button-text strong {
+
+    font-size: 14px;
+
+}
+
+
+.map-button-text span {
+
+    color: var(--text-soft);
+
+    font-size: 10px;
+
+}
