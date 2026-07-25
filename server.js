@@ -1,41 +1,38 @@
 const express = require("express");
-const path = require("path");
 
 const app = express();
+
+const PORT = process.env.PORT || 10000;
+
+const ALLOWED_ORIGIN = "https://vinir.onrender.com";
+
 app.use((req, res, next) => {
-    res.header(
+    res.setHeader(
         "Access-Control-Allow-Origin",
-        "https://vinir.onrender.com"
+        ALLOWED_ORIGIN
     );
 
-    res.header(
+    res.setHeader(
         "Access-Control-Allow-Methods",
         "GET, POST, OPTIONS"
     );
 
-    res.header(
+    res.setHeader(
         "Access-Control-Allow-Headers",
         "Content-Type"
     );
 
     if (req.method === "OPTIONS") {
-        return res.sendStatus(200);
+        return res.sendStatus(204);
     }
 
     next();
 });
 
-const PORT = process.env.PORT || 3000;
-
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-app.use(express.static(path.join(__dirname)));
 
 app.get("/", (req, res) => {
-    res.sendFile(
-        path.join(__dirname, "index.html")
-    );
+    res.send("ВИНИР API работает");
 });
 
 app.post("/api/appointment", async (req, res) => {
@@ -63,14 +60,18 @@ app.post("/api/appointment", async (req, res) => {
             process.env.TELEGRAM_CHAT_ID;
 
         if (!botToken || !chatId) {
+            console.error(
+                "Не найдены TELEGRAM_BOT_TOKEN или TELEGRAM_CHAT_ID"
+            );
+
             return res.status(500).json({
                 success: false,
-                message: "Telegram не настроен"
+                message: "Telegram не настроен на сервере"
             });
         }
 
-        const message = `
-🦷 НОВАЯ ЗАЯВКА НА ПРИЁМ
+        const message =
+`🦷 НОВАЯ ЗАЯВКА НА ПРИЁМ
 
 👤 Имя:
 ${name}
@@ -82,8 +83,7 @@ ${phone}
 ${service || "Не указано"}
 
 💬 Что беспокоит:
-${complaint || "Не указано"}
-        `;
+${complaint || "Не указано"}`;
 
         const telegramResponse =
             await fetch(
@@ -103,34 +103,34 @@ ${complaint || "Не указано"}
                 }
             );
 
-
         const result =
             await telegramResponse.json();
-
 
         if (!result.ok) {
 
             console.error(
-                "Telegram error:",
+                "Telegram API error:",
                 result
             );
 
             return res.status(500).json({
                 success: false,
-                message: "Ошибка отправки в Telegram"
+                message: "Telegram не принял сообщение"
             });
 
         }
 
-
         res.json({
-            success: true
+            success: true,
+            message: "Заявка отправлена"
         });
-
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "SERVER ERROR:",
+            error
+        );
 
         res.status(500).json({
             success: false,
@@ -141,11 +141,10 @@ ${complaint || "Не указано"}
 
 });
 
-
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
 
     console.log(
-        `Server running on port ${PORT}`
+        `ВИНИР API запущен на порту ${PORT}`
     );
 
 });
