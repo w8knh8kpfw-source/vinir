@@ -15,38 +15,41 @@ document.addEventListener("DOMContentLoaded", () => {
         "sphere-stage"
     );
 
-
-    /* =========================
-       ОКНО ЗАПИСИ
-    ========================= */
-
     function openModal() {
-        modal.classList.add("active");
-        document.body.style.overflow = "hidden";
+        if (modal) {
+            modal.classList.add("active");
+            document.body.style.overflow = "hidden";
+        }
     }
 
     function closeModal() {
-        modal.classList.remove("active");
-        document.body.style.overflow = "";
+        if (modal) {
+            modal.classList.remove("active");
+            document.body.style.overflow = "";
+        }
     }
 
     openButtons.forEach((button) => {
         button.addEventListener("click", openModal);
     });
 
-    closeButton.addEventListener(
-        "click",
-        closeModal
-    );
+    if (closeButton) {
+        closeButton.addEventListener(
+            "click",
+            closeModal
+        );
+    }
 
-    modal.addEventListener(
-        "click",
-        (event) => {
-            if (event.target === modal) {
-                closeModal();
+    if (modal) {
+        modal.addEventListener(
+            "click",
+            (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
             }
-        }
-    );
+        );
+    }
 
     document.addEventListener(
         "keydown",
@@ -58,11 +61,11 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    /* =========================
-       УВЕДОМЛЕНИЕ
-    ========================= */
+    function showNotification(message) {
 
-    function showNotification() {
+        if (!notification) return;
+
+        notification.textContent = message;
 
         notification.classList.add("active");
 
@@ -76,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================
-       ФОРМЫ
+       ОТПРАВКА ЗАЯВКИ В TELEGRAM
     ========================= */
 
     const forms = document.querySelectorAll(
@@ -87,20 +90,186 @@ document.addEventListener("DOMContentLoaded", () => {
 
         form.addEventListener(
             "submit",
-            (event) => {
+            async (event) => {
 
                 event.preventDefault();
 
-                showNotification();
 
-                form.reset();
+                const nameInput =
+                    form.querySelector(
+                        '[name="name"]'
+                    ) ||
+                    form.querySelector(
+                        'input[type="text"]'
+                    );
 
-                if (
-                    form.classList.contains(
-                        "modal-form"
-                    )
-                ) {
-                    closeModal();
+
+                const phoneInput =
+                    form.querySelector(
+                        '[name="phone"]'
+                    ) ||
+                    form.querySelector(
+                        'input[type="tel"]'
+                    );
+
+
+                const serviceInput =
+                    form.querySelector(
+                        '[name="service"]'
+                    ) ||
+                    form.querySelector(
+                        "select"
+                    );
+
+
+                const complaintInput =
+                    form.querySelector(
+                        '[name="complaint"]'
+                    ) ||
+                    form.querySelector(
+                        "textarea"
+                    );
+
+
+                const name =
+                    nameInput
+                        ? nameInput.value.trim()
+                        : "";
+
+
+                const phone =
+                    phoneInput
+                        ? phoneInput.value.trim()
+                        : "";
+
+
+                const service =
+                    serviceInput
+                        ? serviceInput.value
+                        : "";
+
+
+                const complaint =
+                    complaintInput
+                        ? complaintInput.value.trim()
+                        : "";
+
+
+                if (!name || !phone) {
+
+                    showNotification(
+                        "Пожалуйста, заполните имя и телефон"
+                    );
+
+                    return;
+
+                }
+
+
+                const submitButton =
+                    form.querySelector(
+                        'button[type="submit"]'
+                    );
+
+
+                if (submitButton) {
+
+                    submitButton.disabled =
+                        true;
+
+                    submitButton.textContent =
+                        "Отправляем...";
+
+                }
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "https://vinir-api.onrender.com/api/appointment",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+
+                                    name: name,
+
+                                    phone: phone,
+
+                                    service: service,
+
+                                    complaint: complaint
+
+                                })
+
+                            }
+                        );
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            result.message ||
+                            "Ошибка отправки"
+                        );
+
+                    }
+
+
+                    showNotification(
+                        "Заявка отправлена! Мы свяжемся с вами."
+                    );
+
+
+                    form.reset();
+
+
+                    if (
+                        form.classList.contains(
+                            "modal-form"
+                        )
+                    ) {
+
+                        closeModal();
+
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Ошибка:",
+                        error
+                    );
+
+
+                    showNotification(
+                        "Не удалось отправить заявку. Попробуйте ещё раз."
+                    );
+
+
+                } finally {
+
+                    if (submitButton) {
+
+                        submitButton.disabled =
+                            false;
+
+                        submitButton.textContent =
+                            "Отправить заявку";
+
+                    }
+
                 }
 
             }
@@ -206,56 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================
-       ДВИЖЕНИЕ ПРИ НАКЛОНЕ ТЕЛЕФОНА
-    ========================= */
-
-    if (
-        window.DeviceOrientationEvent
-    ) {
-
-        window.addEventListener(
-            "deviceorientation",
-            (event) => {
-
-                const sphere =
-                    document.querySelector(
-                        ".sphere"
-                    );
-
-                if (!sphere) return;
-
-
-                const gamma =
-                    Math.max(
-                        -20,
-                        Math.min(
-                            20,
-                            event.gamma || 0
-                        )
-                    );
-
-
-                const beta =
-                    Math.max(
-                        -20,
-                        Math.min(
-                            20,
-                            event.beta || 0
-                        )
-                    );
-
-
-                sphere.style.transform =
-                    `translate(${gamma / 3}px, ${beta / 5}px)`;
-
-            }
-        );
-
-    }
-
-
-    /* =========================
-       ПОЯВЛЕНИЕ КАРТОЧЕК
+       ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ
     ========================= */
 
     const animatedElements =
@@ -322,56 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =========================
-       ЭФФЕКТ НА КАРТОЧКАХ
-    ========================= */
-
-    const cards =
-        document.querySelectorAll(
-            ".glass-card"
-        );
-
-
-    cards.forEach(
-        (card) => {
-
-            card.addEventListener(
-                "mousemove",
-                (event) => {
-
-                    const rect =
-                        card.getBoundingClientRect();
-
-
-                    const x =
-                        event.clientX -
-                        rect.left;
-
-
-                    const y =
-                        event.clientY -
-                        rect.top;
-
-
-                    card.style.setProperty(
-                        "--mouse-x",
-                        `${x}px`
-                    );
-
-
-                    card.style.setProperty(
-                        "--mouse-y",
-                        `${y}px`
-                    );
-
-                }
-            );
-
-        }
-    );
-
-
-    /* =========================
-       ПЛАВНАЯ АНИМАЦИЯ ВАЖНЫХ СЛОВ
+       АНИМАЦИЯ ГРАДИЕНТА
     ========================= */
 
     const gradientTexts =
